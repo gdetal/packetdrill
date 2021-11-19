@@ -1,0 +1,7 @@
+--tolerance_usecs=100000
+`../../common/defaults.sh`
+
+// TCP_MD5SIG is not supported by MPTCP sockets and will never be.
+0.0   socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
++0.0  setsockopt(3, SOL_TCP, TCP_MD5SIG, [1], 4)   = -1 ENOPROTOOPT (Protocol not available)
++0.0  getsockopt(3, SOL_TCP, TCP_MD5SIG, [0], [4]) = -1 EOPNOTSUPP (Operation not supported)
