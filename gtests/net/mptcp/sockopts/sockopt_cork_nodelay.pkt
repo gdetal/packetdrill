@@ -1,0 +1,53 @@
+// derived from tcp/nagle/sockopt_cork_nodelay.pkt
+--tolerance_usecs=100000
+`../common/defaults.sh`
+
+
++0.0   socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
++0.0   setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
++0.0   setsockopt(3, SOL_TCP, TCP_CORK, [1], 4) = 0
+
++0     bind(3, ..., ...) = 0
++0     listen(3, 1) = 0
+
++0.0     <  S   0:0(0)                win 65535  <mss 1460, sackOK, TS val 4074410674 ecr 0,          nop, wscale 8, mpcapable v1 flags[flag_h] nokey>
++0.0     >  S.  0:0(0)       ack 1               <mss 1460, sackOK, TS val 4074410674 ecr 4074410674, nop, wscale 8, mpcapable v1 flags[flag_h] key[skey]>
++0.0     <   .  1:1(0)       ack 1    win 256    <nop, nop,         TS val 4074410674 ecr 4074410674,                mpcapable v1 flags[flag_h] key[ckey=2, skey]>
++0     accept(3, ..., ...) = 4
+
+// check that TCP_CORK was synced from listener
++0.0   getsockopt(4, SOL_TCP, TCP_CORK,  [1], [4]) = 0
+
++0.0   write(4, ..., 40) = 40
++0.05  write(4, ..., 40) = 40
+
+// clearing TCP_CORK should push pending bytes out
++0.01  setsockopt(4, SOL_TCP, TCP_CORK, [0], 4) = 0
++0.0     >  P.  1:81(80)     ack 1               <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1  dsn8=1   ssn=1    dll=80  nocs, nop, nop>
++0.01    <   .  1:1(0)       ack 81   win 256    <nop, nop, TS val 448955294 ecr 448955294, dss dack4=81 nocs>
+
+// set TCP_CORK once again
++0.0   setsockopt(4, SOL_TCP, TCP_CORK, [1], 4) = 0
++0.0   write(4, ..., 40) = 40
++0.05  write(4, ..., 40) = 40
+
+// setting TCP_NODELAY on a socket with TCP_CORK should push pending bytes out
++0.0   setsockopt(4, SOL_TCP, TCP_NODELAY, [1], 4) = 0
++0.0     >  P.  81:161(80)   ack 1               <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1   dsn8=81  ssn=81  dll=80  nocs, nop, nop>
++0.1     <   .  1:1(0)       ack 161  win 256    <nop, nop, TS val 448955294 ecr 448955294, dss dack4=161 nocs>
+
+// TCP_CORK has priority over TCP_NODELAY
++0.0   write(4, ..., 1) = 1
++0.01  write(4, ..., 1) = 1
++0.2     >  P.  161:163(2)   ack 1               <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1   dsn8=161 ssn=161 dll=2   nocs, nop, nop>
++0.0     <   .  1:1(0)       ack 163  win 256    <nop, nop, TS val 448955294 ecr 448955294, dss dack4=163 nocs>
+
+// clearing TCP_CORK on the accepted connection (TCP_NODELAY stays enabled)
++0.01  setsockopt(4, SOL_TCP, TCP_CORK, [0], 4) = 0
+
+// check that Nagle's algorithm is disabled
++0.0   write(4, ..., 1) = 1
++0.01  write(4, ..., 1) = 1
++0.0     >  P.  163:164(1)   ack 1               <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1   dsn8=163 ssn=163 dll=1   nocs, nop, nop>
++0.0     >  P.  164:165(1)   ack 1               <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1   dsn8=164 ssn=164 dll=1   nocs, nop, nop>
++0.0     <   .  1:1(0)       ack 165  win 256    <nop, nop, TS val 448955294 ecr 448955294, dss dack4=165 nocs>
