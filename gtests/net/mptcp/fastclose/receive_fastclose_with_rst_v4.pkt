@@ -17,8 +17,8 @@
 
 // the 4th ack, making the mptcp socket fully established, will trigger the add_addr
 +0.0     <                                .  1:1(0)           ack 1     win 256                                         <dss dack4=1 nocs>
-+0.0     >                                .  1:1(0)           ack 1                <add_address addr[saddr1] hmac=auto>
-+0.0     <                                .  1:1(0)           ack 1     win 256    <add_address addr[saddr1] addr_echo,  dss dack4=1 nocs>
++0.0     >                                .  1:1(0)           ack 1                <add_address address_id=1 addr[saddr1] hmac=auto>
++0.0     <                                .  1:1(0)           ack 1     win 256    <add_address address_id=1 addr[saddr1] addr_echo,  dss dack4=1 nocs>
 
 +0.0     <                               P.  1:1001(1000)     ack 1     win 450    <nop, nop,                 dss dack8=1    dsn8=1    ssn=1    dll=1000 nocs>
 +0.0     >                                .  1:1(0)           ack 1001                                       <dss dack8=1001 nocs>
