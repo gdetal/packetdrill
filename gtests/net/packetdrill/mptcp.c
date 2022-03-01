@@ -1830,7 +1830,8 @@ static struct endpoint *find_next_addr_outbound(struct packet *live_packet, stru
 	   add_addr_script->length == TCPOLEN_ADD_ADDR_V6_HMAC){
 		struct tuple tuple;
 		get_packet_tuple(live_packet, &tuple);
-		endpoint->port = tuple.src.port;
+		endpoint->port = add_addr_script->data.add_addr.flag_E ?
+			tuple.dst.port : tuple.src.port;
 	}else if(add_addr_script->length == TCPOLEN_ADD_ADDR_V4_PORT ||
 		 add_addr_script->length == TCPOLEN_ADD_ADDR_V4_PORT_HMAC){
 		if(add_addr_script->data.add_addr.ipv4_w_port.port == UNDEFINED)
