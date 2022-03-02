@@ -47,6 +47,7 @@ enum socket_state_t {
 	SOCKET_ACTIVE_CONNECTING,	/* after connect() call */
 	SOCKET_ACTIVE_SYN_SENT,		/* after sending client's SYN */
 	SOCKET_ACTIVE_SYN_ACKED,	/* after client's SYN is ACKed */
+	SOCKET_ACTIVE_MP_JOIN_SYN_SENT, /* after sending client's MP_JOIN SYN */
 };
 
 /* A TCP/UDP/IP address for an endpoint. */
