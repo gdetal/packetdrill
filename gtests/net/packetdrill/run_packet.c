@@ -371,6 +371,32 @@ static struct socket *find_connect_for_live_packet(
 	return socket;
 }
 
+static struct socket *find_mp_join_for_live_packet(
+	struct state *state, struct packet *packet,
+	enum direction_t *direction)
+{
+	struct tuple tuple;
+	struct socket *socket = state->socket_under_test;	/* shortcut */
+
+	*direction = DIRECTION_INVALID;
+	if (!socket)
+		return NULL;
+
+	get_packet_tuple(packet, &tuple);
+
+         if (packet->tcp && packet->tcp->syn && !packet->tcp->ack &&
+	     socket->protocol == IPPROTO_MPTCP &&
+	     socket->state == SOCKET_ACTIVE_MP_JOIN_SYN_SENT) {
+		socket->live.remote = tuple.dst;
+		socket->live.local.ip = tuple.src.ip;
+		socket->live.local.port	= tuple.src.port;
+		*direction = DIRECTION_OUTBOUND;
+		socket->live.local_isn	= ntohl(packet->tcp->seq);
+
+	 }
+	 return socket;
+}
+
 static struct socket *handle_mp_join_for_script_packet(
 	struct state *state, const struct packet *packet,
 	enum direction_t direction)
@@ -419,7 +445,7 @@ static struct socket *handle_mp_join_for_script_packet(
 
 	/* Fill in the new info about this connection. */
 	if (direction == DIRECTION_OUTBOUND) {
-		socket->state = SOCKET_ACTIVE_SYN_SENT;
+		socket->state = SOCKET_ACTIVE_MP_JOIN_SYN_SENT;
 
 		socket->live.remote             = tuple.dst;
 
@@ -1835,6 +1861,11 @@ static int sniff_outbound_live_packet(
 						      &direction);
 		if ((socket != NULL) && (direction == DIRECTION_OUTBOUND))
 			break;
+
+		socket = find_mp_join_for_live_packet(state, *packet, &direction);
+		if ((socket != NULL) && (direction == DIRECTION_OUTBOUND))
+			break;
+
 		packet_free(*packet);
 		*packet = NULL;
 	}
@@ -1844,6 +1875,8 @@ static int sniff_outbound_live_packet(
 	assert(direction == DIRECTION_OUTBOUND);
 
 	if (socket != expected_socket) {
+		DEBUGP("socket:%p expected: %p\n",
+		       (void*)socket, (void*)expected_socket);
 		asprintf(error, "packet is not for expected socket");
 		return STATUS_ERR;
 	}
