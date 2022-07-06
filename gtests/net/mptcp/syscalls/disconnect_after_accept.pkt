@@ -1,0 +1,19 @@
+// try do disconnect a newly accepted socket
+--tolerance_usecs=100000
+`../common/defaults.sh`
+
++0.0  socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
++0.0  setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
++0.0  fcntl(3, F_GETFL) = 0x2 (flags O_RDWR)
++0.0  fcntl(3, F_SETFL, O_RDWR|O_NONBLOCK) = 0
+
++0    bind(3, ..., ...) = 0
++0    listen(3, 1) = 0
+
++0       <  S   0:0(0)         win 32792  <mss 1000, sackOK, nop, nop, nop, wscale 7, mpcapable v1 flags[flag_h] nokey>
++0       >  S.  0:0(0)  ack 1             <mss 1460, nop, nop, sackOK, nop, wscale 8, mpcapable v1 flags[flag_h] key[skey]>
++0.01    <   .  1:1(0)  ack 1  win 257                                               <mpcapable v1 flags[flag_h] key[ckey=2, skey]>
+
++0    accept(3, ..., ...) = 4
+
++0    connect(4, AF_UNSPEC,...) = 0
