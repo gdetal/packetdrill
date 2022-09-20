@@ -29,5 +29,4 @@
 
 // ACK the data_fin
 +0       <   .  2:2(0)  ack 1  win 450    <dss dack4=2 nocs>
-+0       >  F.  1:1(0)  ack 2             <dss dack4=2 nocs>
-+0       <   .  2:2(0)  ack 2  win 450    <dss dack4=2 nocs>
++0       >  R.  1:1(0)  ack 2             <mp_fastclose, mp_reset 0>
