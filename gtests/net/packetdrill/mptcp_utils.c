@@ -225,7 +225,7 @@ u32 generate_32() {
 	return rand();
 }
 
-key64 get_barray_from_key64(unsigned long long key) {
+key64 get_barray_from_key64(u64 key) {
 	return *(key64 *) (unsigned char*) &key;
 }
 
@@ -587,8 +587,8 @@ void mptcp_hmac_sha256(u64 key_1, u64 key_2, u32 rand_1, u32 rand_2,
 {
 	/* Build key for HMAC-SHA256 */
 	unsigned char hmac_key[16];
-	unsigned long *key_a = (unsigned long*)hmac_key;
-	unsigned long *key_b = (unsigned long*)&(hmac_key[8]);
+	u64 *key_a = (u64 *)hmac_key;
+	u64 *key_b = (u64 *)&(hmac_key[8]);
 	*key_a = key_1;
 	*key_b = key_2;
 
