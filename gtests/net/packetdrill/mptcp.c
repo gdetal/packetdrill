@@ -820,8 +820,8 @@ static int mp_join_syn_ack(struct packet *packet_to_modify,
 
 		//Build key for HMAC-SHA1
 		unsigned char hmac_key[16];
-		unsigned long *key_b = (unsigned long*)hmac_key;
-		unsigned long *key_a = (unsigned long*)&(hmac_key[8]);
+		u64 *key_b = (u64 *)hmac_key;
+		u64 *key_a = (u64 *)&(hmac_key[8]);
 		*key_b = mp_state.kernel_key;
 		*key_a = mp_state.packetdrill_key;
 
@@ -1904,8 +1904,8 @@ static u64 add_addr_ipv4_hmac(u64 key1, u64 key2, u8 address_id, struct in_addr*
 {
 	//Build key for HMAC-SHA256
 	unsigned char hmac_key[16];
-	unsigned long *key_a = (unsigned long*)hmac_key;
-	unsigned long *key_b = (unsigned long*)&(hmac_key[8]);
+	u64 *key_a = (u64 *)hmac_key;
+	u64 *key_b = (u64 *)&(hmac_key[8]);
 	*key_a = key1;
 	*key_b = key2;
 
@@ -1923,8 +1923,8 @@ static u64 add_addr_ipv6_hmac(u64 key1, u64 key2, u8 address_id, struct in6_addr
 {
 	//Build key for HMAC-SHA256
 	unsigned char hmac_key[16];
-	unsigned long *key_a = (unsigned long*)hmac_key;
-	unsigned long *key_b = (unsigned long*)&(hmac_key[8]);
+	u64 *key_a = (u64 *)hmac_key;
+	u64 *key_b = (u64 *)&(hmac_key[8]);
 	*key_a = key1;
 	*key_b = key2;
 
