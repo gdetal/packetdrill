@@ -3,7 +3,7 @@
 `../common/defaults.sh
  sysctl -q net.ipv4.tcp_fastopen=0x5`
 
-+0.1    socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
+ 0.0    socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
 +0.0    fcntl(3, F_SETFL, O_RDWR|O_NONBLOCK) = 0
 +0.0    sendto(3, ..., 500, MSG_FASTOPEN, ..., ...) = 500
 
