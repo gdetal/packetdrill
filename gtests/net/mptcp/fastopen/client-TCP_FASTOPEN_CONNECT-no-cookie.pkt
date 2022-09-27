@@ -5,7 +5,9 @@
 
  0.0    socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
 +0.0    fcntl(3, F_SETFL, O_RDWR|O_NONBLOCK) = 0
++0.0    getsockopt(3, SOL_TCP, TCP_FASTOPEN_CONNECT, [0], [4]) = 0
 +0.0    setsockopt(3, SOL_TCP, TCP_FASTOPEN_CONNECT, [1], 4) = 0
++0.0    getsockopt(3, SOL_TCP, TCP_FASTOPEN_CONNECT, [1], [4]) = 0
 +0.0    connect(3, ..., ...) = 0
 +0.0    write(3, ..., 500) = 500
 
@@ -17,6 +19,10 @@
 +0.1    write(3, ..., 1000) = 1000
 +0.01     >  P.  501:1501(1000)  ack 1                <nop, nop, TS val 100 ecr 700, mpcapable v1 flags[flag_h] key[ckey, skey] mpcdatalen 1000, nop, nop>
 +0.01     <   .  1:1(0)          ack 1501  win 225                                  <dss dack8=1001 nocs>
+
+// Similar to TCP?
++0.0    setsockopt(3, SOL_TCP, TCP_FASTOPEN_CONNECT, [1], 4) = -1 (Invalid argument)
++0.0    getsockopt(3, SOL_TCP, TCP_FASTOPEN_CONNECT, [1], [4]) = 0
 
 +0.1    close(3) = 0
 +0.01     >   .  1501:1501(0)    ack 1                <nop, nop, TS val 100 ecr 700, dss dack4=1 dsn8=1001 ssn=0 dll=1 nocs fin, nop, nop>
