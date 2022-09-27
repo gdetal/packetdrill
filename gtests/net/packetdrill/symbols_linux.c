@@ -187,11 +187,14 @@ struct int_symbol platform_symbols_table[] = {
 	{ TCP_USER_TIMEOUT,                 "TCP_USER_TIMEOUT"                },
 	{ TCP_FASTOPEN,                     "TCP_FASTOPEN"                    },
 	{ TCP_FASTOPEN_CONNECT,             "TCP_FASTOPEN_CONNECT"            },
+	{ TCP_FASTOPEN_KEY,                 "TCP_FASTOPEN_KEY"                },
+	{ TCP_FASTOPEN_NO_COOKIE,           "TCP_FASTOPEN_NO_COOKIE"          },
 	{ TCP_TIMESTAMP,                    "TCP_TIMESTAMP"                   },
 	{ TCP_NOTSENT_LOWAT,                "TCP_NOTSENT_LOWAT"               },
 	{ TCP_INQ,			    "TCP_INQ"			      },
 
 	{ TCP_CM_INQ,			    "TCP_CM_INQ"		      },
+	{ TCP_TX_DELAY,			    "TCP_TX_DELAY"		      },
 
 	{ O_RDONLY,                         "O_RDONLY"                        },
 	{ O_WRONLY,                         "O_WRONLY"                        },
