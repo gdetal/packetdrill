@@ -576,6 +576,8 @@ static void setenv_config(struct config *config)
 	safe_setenv("OPT_SPEED", value);
 	sprintf(value, "%ld", config->tolerance_usecs);
 	safe_setenv("OPT_TOLERANCE_USECS", value);
+	sprintf(value, "%f", config->tolerance_percent);
+	safe_setenv("OPT_TOLERANCE_PERCENT", value);
 	safe_setenv("OPT_TCP_TS_ECR_SCALED", config->tcp_ts_ecr_scaled ? "1" : "0");
 	sprintf(value, "%d", config->tcp_ts_tick_usecs);
 	safe_setenv("OPT_TCP_TS_TICK_USECS", value);
