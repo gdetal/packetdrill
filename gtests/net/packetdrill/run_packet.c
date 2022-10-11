@@ -1588,18 +1588,31 @@ static int verify_outbound_live_ipv6_flowlabel(
 }
 
 static int verify_outbound_tcp_option(
-	struct config *config,
+	struct state *state,
 	struct packet *actual_packet,
 	struct packet *script_packet,
 	struct tcp_option *actual_option,
 	struct tcp_option *script_option,
 	char **error)
 {
+	struct config *config = state->config;
 	u32 script_ts_val, actual_ts_val;
 	int ts_val_tick_usecs;
 	long tolerance_usecs;
+	double dynamic_tolerance;
+	s64 delta;
 
 	tolerance_usecs = config->tolerance_usecs;
+	/* Note that for TCP TS, we do not want to compute the tolerance based
+	 * on last event (as we do in verify_time())
+	 * last event might have happened few ms in the past.
+	 * What matters here is the cumulative time (from the beginning of the test)
+	 */
+	delta = state->event->time_usecs - state->script_start_time_usecs;
+
+	dynamic_tolerance = (config->tolerance_percent / 100.0) * delta;
+	if (dynamic_tolerance > tolerance_usecs)
+		tolerance_usecs = dynamic_tolerance;
 
 	switch (actual_option->kind) {
 	case TCPOPT_EOL:
@@ -1651,7 +1664,7 @@ static int verify_outbound_tcp_option(
 
 /* Verify that the TCP option values matched expected values. */
 static int verify_outbound_live_tcp_options(
-	struct config *config,
+	struct state *state,
 	struct packet *actual_packet,
 	struct packet *script_packet, char **error)
 {
@@ -1674,9 +1687,9 @@ static int verify_outbound_live_tcp_options(
 			return STATUS_ERR;
 		}
 
-		if (verify_outbound_tcp_option(config, actual_packet,
-					script_packet, a_opt, s_opt,
-					error) != STATUS_OK) {
+		if (verify_outbound_tcp_option(state, actual_packet,
+					       script_packet, a_opt, s_opt,
+					       error) != STATUS_OK) {
 			return STATUS_ERR;
 		}
 
@@ -1757,7 +1770,7 @@ static int verify_outbound_live_packet(
 	if (script_packet->tcp) {
 		/* Verify TCP options matched expected values. */
 		if (verify_outbound_live_tcp_options(
-			    state->config, actual_packet, script_packet,
+			    state, actual_packet, script_packet,
 			    error)) {
 			non_fatal = true;
 			goto out;
@@ -1779,6 +1792,7 @@ static int verify_outbound_live_packet(
 	DEBUGP("packet time_usecs: %lld\n", live_packet->time_usecs);
 	if (verify_time(state, time_type, script_usecs,
 				script_usecs_end, live_packet->time_usecs,
+				last_event_time_usecs(state),
 				"outbound packet", error)) {
 		non_fatal = true;
 		goto out;
@@ -1837,6 +1851,47 @@ static int verify_packet_fragments(
 		return STATUS_ERR;
 	}
 	return STATUS_OK;
+}
+
+static void dump_one_sniffed_packet(struct state *state,
+				    struct packet *sniffed_packet,
+				    int packet_index,
+				    char **error)
+{
+	s64 actual_usecs = live_time_to_script_time_usecs(
+		state, sniffed_packet->time_usecs);
+	char *packet_desc;
+
+	asprintf(&packet_desc, "actual #%d", packet_index);
+	add_packet_dump(error, packet_desc, sniffed_packet, actual_usecs,
+			DUMP_SHORT);
+	free(packet_desc);
+}
+
+/* Write a human-readable message for cases where a sequence of sniffed packets
+ * does not match an expected TSO/GSO jumbogram.
+ */
+static void dump_packet_fragment_mismatch(
+	struct state *state,
+	struct packet_list *sniffed_packets_start,
+	struct packet *sniffed_packet_latest,
+	struct packet *script_packet,
+	char **error)
+{
+	struct packet_list *sniffed_iter = NULL;
+	int packet_index = 0;
+
+	add_packet_dump(error, "   script", script_packet,
+			state->event->time_usecs, DUMP_SHORT);
+
+	for (sniffed_iter = sniffed_packets_start; sniffed_iter != NULL;
+	     sniffed_iter = sniffed_iter->next) {
+		dump_one_sniffed_packet(state, sniffed_iter->packet,
+					packet_index, error);
+		packet_index++;
+	}
+	dump_one_sniffed_packet(state, sniffed_packet_latest,
+				packet_index, error);
 }
 
 /* Sniff the next outbound live packet and return it. */
@@ -2116,6 +2171,12 @@ static int do_outbound_script_packet(
 						sniffed_payload_len,
 						expected_payload_len,
 						error)) {
+					dump_packet_fragment_mismatch(
+						state,
+						sniffed_packets_start,
+						sniffed->packet,
+						packet,
+						error);
 					packet_list_free(sniffed);
 					goto out;
 				}

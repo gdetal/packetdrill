@@ -442,8 +442,10 @@ static void get_nla_value(const struct expression *expr, void *out_buf,
  * expressions of the form: key = val.
  */
 static int nla_expr_list_to_nla(struct expression_list *list,
-				void *dst, int *len,
-				struct nla_type_info *nla_info, char **error)
+				void *dst, int dst_len, int *len,
+				struct nla_type_info *nla_info,
+				int nla_info_len,
+				char **error)
 {
 	struct expression *element, *key, *value;
 	void *start = dst;
@@ -471,6 +473,10 @@ static int nla_expr_list_to_nla(struct expression_list *list,
 		}
 
 		key_num = key->value.num;
+		if (key_num < 0 || key_num >= nla_info_len) {
+			asprintf(error, "bad NLA type %lld\n", key_num);
+			return STATUS_ERR;
+		}
 		val_num = value->value.num;
 		num_bytes = nla_info[key_num].length;
 		if (num_bytes == sizeof(u8) &&
@@ -589,8 +595,12 @@ static int cmsg_new(const struct expression *expr, struct msghdr *msg,
 
 		case EXPR_LIST:
 			stats_expr = cmsg_expr->cmsg_data->value.list;
-			if (nla_expr_list_to_nla(stats_expr, data, &len,
-						 tcp_nla, error))
+			if (nla_expr_list_to_nla(stats_expr, data,
+						 (MSGHDR_MAX_CONTROLLEN - sum
+						  - sizeof(struct cmsghdr)),
+						 &len,
+						 tcp_nla, ARRAY_SIZE(tcp_nla),
+						 error))
 				goto error_out;
 			break;
 
@@ -1637,18 +1647,20 @@ static int run_syscall_pipe(struct state *state, int *pfd_script, int *pfd_live,
 static int syscall_socket(struct state *state, struct syscall_spec *syscall,
 			  struct expression_list *args, char **error)
 {
-	int domain, type, protocol, live_fd, script_fd, result;
+	int domain = state->config->socket_domain;
+	int type, protocol, live_fd, script_fd, result;
 
 	if (check_arg_count(args, 3, error))
 		return STATUS_ERR;
+
 	if (ellipsis_arg(args, 0, error))
-		return STATUS_ERR;
+		if (s32_arg(args, 0, &domain, error))
+			return STATUS_ERR;
+
 	if (s32_arg(args, 1, &type, error))
 		return STATUS_ERR;
 	if (s32_arg(args, 2, &protocol, error))
 		return STATUS_ERR;
-
-	domain = state->config->socket_domain;
 
 	begin_syscall(state, syscall);
 
@@ -3524,12 +3536,18 @@ static void *system_call_thread(void *arg)
 			 */
 			invoke_system_call(state, event, syscall);
 
-			/* Check end time for the blocking system call. */
+			/* Check end time for the blocking system call.
+			 * For a blocking system call we compute the
+			 * dynamic tolerance based on the start and end
+			 * time. The last event here is unpredictable
+			 * and irrelevant.
+			 */
 			assert(state->syscalls->live_end_usecs >= 0);
 			if (verify_time(state,
 						event->time_type,
 						syscall->end_usecs, 0,
 						state->syscalls->live_end_usecs,
+						event->time_usecs,
 						"system call return", &error)) {
 				die("%s:%d: %s\n",
 				    state->config->script_path,
