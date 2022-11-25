@@ -1,0 +1,16 @@
+// Receive data with TFO + cookie
+--tolerance_usecs=100000
+`../common/defaults.sh`
+
+// A first connection to store the cookie
+ 0.0    socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
++0.0    setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
++0.0    setsockopt(3, SOL_TCP, TCP_FASTOPEN_KEY, "d4d4d4d4c3c3c3c3b2b2b2b2a1a1a1a1", 32) = 0
++0.0    getsockopt(3, SOL_TCP, TCP_FASTOPEN_KEY, "d4d4d4d4c3c3c3c3b2b2b2b2a1a1a1a1", [32]) = 0
++0.0    setsockopt(3, SOL_TCP, TCP_FASTOPEN, [2], 4) = 0
+
++0.0    bind(3, ..., ...) = 0
++0.0    listen(3, 1) = 0
+
++0.0      <  S   0:0(0)         win 65535  <mss 1460, sackOK, TS val 100 ecr 0,   nop, wscale 8, FO,            nop, nop>
++0.01     >  S.  0:0(0)  ack 1             <mss 1460, nop,nop,sackOK, nop, wscale 8, FO 507dbb44ed4b1737, nop, nop>
