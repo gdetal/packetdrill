@@ -1,0 +1,15 @@
+// Reproducer for issue #316
+// https://github.com/multipath-tcp/mptcp_net-next/issues/316
+--tolerance_usecs=100000
+`../common/defaults.sh
+ sysctl -q net.ipv4.tcp_fastopen=0x602`
+
+ 0.0    socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
++0.0    setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+
++0.0    bind(3, ..., ...) = 0
++0.0    listen(3, 1) = 0
+
++0.0      <  S   0:500(500)               win 65535  <mss 1460, sackOK, TS val 100 ecr 0,   nop, wscale 8, FO, nop, nop, mpcapable v1 flags[flag_h] nokey>
+
+// The reset sent by packetdrill after this was creating a kernel deadlock
