@@ -1,5 +1,5 @@
 // connection initiated by packetdrill
---tolerance_usecs=200000
+--tolerance_usecs=350000
 `../common/defaults.sh`
 
 // an address not used in packetdrill defaults
