@@ -70,6 +70,7 @@ struct expression_type_entry expression_type_table[] = {
 	{ EXPR_POLLFD,               "pollfd" },
 	{ EXPR_MPLS_STACK,           "mpls_stack" },
 	{ EXPR_SCM_TIMESTAMPING,     "scm_timestamping"},
+	{ EXPR_TIMEVAL,              "timeval"},
 	{ EXPR_SOCK_EXTENDED_ERR,    "sock_extended_err"},
 	{ EXPR_EPOLLEV,		     "epollev" },
 	{-1,                         NULL}
@@ -359,6 +360,10 @@ void free_expression(struct expression *expression)
 	case EXPR_SCM_TIMESTAMPING:
 		assert(expression->value.scm_timestamping);
 		free(expression->value.scm_timestamping);
+		break;
+	case EXPR_TIMEVAL:
+		assert(expression->value.timeval);
+		free(expression->value.timeval);
 		break;
 	case EXPR_SOCK_EXTENDED_ERR:
 		assert(expression->value.sock_extended_err);
@@ -728,6 +733,11 @@ static int evaluate(struct expression *in,
 		memcpy(&out->value.scm_timestamping,
 		       &in->value.scm_timestamping,
 		       sizeof(in->value.scm_timestamping));
+		break;
+	case EXPR_TIMEVAL:
+		memcpy(&out->value.timeval,
+		       &in->value.timeval,
+		       sizeof(in->value.timeval));
 		break;
 	case EXPR_SOCK_EXTENDED_ERR:
 		result = evaluate_sock_extended_err(in, out, error);

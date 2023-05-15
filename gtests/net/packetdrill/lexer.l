@@ -209,6 +209,8 @@ ee_info			return EE_INFO;
 ee_data			return EE_DATA;
 scm_sec			return SCM_SEC;
 scm_nsec		return SCM_NSEC;
+tv_sec			return TV_SEC;
+tv_usec			return TV_USEC;
 fd			return FD;
 u32			return U32;
 u64			return U64;

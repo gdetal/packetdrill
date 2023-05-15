@@ -51,6 +51,7 @@ enum expression_t {
 	EXPR_POLLFD,		  /* expression tree for a pollfd struct */
 	EXPR_MPLS_STACK,	  /* MPLS label stack expression */
 	EXPR_SCM_TIMESTAMPING,	  /* scm_timestamping expression */
+	EXPR_TIMEVAL,		  /* timeval expression */
 	EXPR_SOCK_EXTENDED_ERR,	  /* scm_sock_extended_err expression */
 	EXPR_EPOLLEV,	          /* expression tree for a epoll_event struct */
 	NUM_EXPR_TYPES,
@@ -83,6 +84,7 @@ struct expression {
 		struct pollfd_expr *pollfd;
 		struct mpls_stack *mpls_stack;
 		struct scm_timestamping_expr *scm_timestamping;
+		struct timeval_expr *timeval;
 		struct sock_extended_err_expr *sock_extended_err;
 		struct epollev_expr *epollev;
 	} value;
@@ -130,6 +132,10 @@ struct cmsg_expr {
 /* A verbatim copy of Linux's struct scm_timestamping for portability. */
 struct scm_timestamping_expr {
 	struct timespec ts[3];
+};
+
+struct timeval_expr {
+	struct timeval tv;
 };
 
 /* Parse tree for a sock_extended_err item in a recvmsg syscall. */

@@ -864,6 +864,7 @@ struct tcp_option *dss_do_dsn_dack( int dack_type, int dack_val,
 %token <reserved> NONE CHECKSUM SEQUENCE PRESENT
 %token <reserved> EE_ERRNO EE_CODE EE_DATA EE_INFO EE_ORIGIN EE_TYPE
 %token <reserved> SCM_SEC SCM_NSEC
+%token <reserved> TV_SEC TV_USEC
 %token <floating> FLOAT
 %token <integer> INTEGER HEX_INTEGER
 %token <string> WORD STRING BACK_QUOTED CODE IPV4_ADDR IPV6_ADDR
@@ -917,6 +918,7 @@ struct tcp_option *dss_do_dsn_dack( int dack_type, int dack_val,
 %type <expression> inaddr in6addr sockaddr msghdr iovec pollfd opt_revents linger
 %type <expression> opt_cmsg cmsg_expr
 %type <expression> scm_timestamping_expr
+%type <expression> timeval_expr
 %type <expression> sock_extended_err_expr
 %type <expression> mpls_stack_expression
 %type <expression> gre_header_expression
@@ -2522,6 +2524,9 @@ expression
 | scm_timestamping_expr {
 	$$ = $1;
 }
+| timeval_expr {
+	$$ = $1;
+}
 | sub_expr_list {
 	$$ = $1;
 }
@@ -2706,6 +2711,19 @@ scm_timestamping_expr
 
 	$$ = new_expression(EXPR_SCM_TIMESTAMPING);
 	$$->value.scm_timestamping = ts_expr;
+}
+;
+
+timeval_expr
+: '{' TV_SEC '=' INTEGER ','
+      TV_USEC '=' INTEGER '}' {
+	struct timeval_expr *tv_expr =
+		calloc(1, sizeof(struct timeval));
+	tv_expr->tv.tv_sec = $4;
+	tv_expr->tv.tv_usec = $8;
+
+	$$ = new_expression(EXPR_TIMEVAL);
+	$$->value.timeval = tv_expr;
 }
 ;
 

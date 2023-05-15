@@ -224,6 +224,7 @@ expression: ELLIPSIS
           | mpls_stack_expression
           | cmsg_expr
           | scm_timestamping_expr
+          | timeval_expr
           | sub_expr_list
           | sock_extended_err_expr
           | '{' gre_header_expression '}'
@@ -256,6 +257,8 @@ opt_cmsg: %empty
 cmsg_expr: '{' CMSG_LEVEL '=' expression ',' CMSG_TYPE '=' expression ',' CMSG_DATA '=' expression '}'
 
 scm_timestamping_expr: '{' SCM_SEC '=' INTEGER ',' SCM_NSEC '=' INTEGER '}'
+
+timeval_expr: '{' TV_SEC '=' INTEGER ',' TV_USEC '=' INTEGER '}'
 
 sub_expr_list: '{' expression_list '}'
 

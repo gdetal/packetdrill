@@ -2741,6 +2741,8 @@ static int syscall_setsockopt(struct state *state, struct syscall_spec *syscall,
 		if (s32_bracketed_arg(args, 3, &optval_s32, error))
 			return STATUS_ERR;
 		optval = &optval_s32;
+	} else if (val_expression->type == EXPR_TIMEVAL) {
+		optval = &val_expression->value.timeval->tv;
 	} else {
 		asprintf(error, "unsupported setsockopt value type: %s",
 			 expression_type_to_string(
