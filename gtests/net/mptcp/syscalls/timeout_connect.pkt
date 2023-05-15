@@ -1,0 +1,10 @@
+// connect() function, connection initiated by the kernel
+--tolerance_usecs=100000
+`../common/defaults.sh`
+
+0.0       socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
++0.0      setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+
++0.0      setsockopt(3, SOL_SOCKET, SO_SNDTIMEO, { tv_sec=0, tv_usec=600000 }, 16) = 0
+
++0...0.6  connect(3, ..., ...) = -1  EINPROGRESS (Operation now in progress)
