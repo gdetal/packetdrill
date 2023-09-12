@@ -1,0 +1,21 @@
+// This test case covers: https://github.com/multipath-tcp/mptcp_net-next/issues/430
+// ensure that a tcp-level timeout is catched
+--tolerance_usecs=100000
+`../common/defaults.sh
+sysctl -q net/ipv4/tcp_syn_retries=1
+sysctl -q net/ipv4/tcp_syn_linear_timeouts=0`
+
+0.0     socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
++0.0    setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
++0.0    fcntl(3, F_GETFL) = 0x2 (flags O_RDWR)
++0.0    fcntl(3, F_SETFL, O_RDWR|O_NONBLOCK) = 0
+
+// Start a connection
+
++0.0    connect(3, ..., ...) = -1  EINPROGRESS (Operation now in progress)
++0.0      >  S   0:0(0)                    <mss 1460, sackOK, TS val 100 ecr 0,   nop, wscale 8, mpcapable v1 flags[flag_h] nokey>
+
+
+// set back to block. With the above setting TCP will timeout after 3 secs
++0.0        fcntl(3, F_SETFL, O_RDWR) = 0
++3...3.1  connect(3, ..., ...) = -1 ETIMEDOUT (Connection timed out)
