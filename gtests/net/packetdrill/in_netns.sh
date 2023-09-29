@@ -14,12 +14,13 @@ setup() {
 	if [ -n "${TCPDUMP_OUTPUT}" ]; then
 		ip netns exec "${NETNS}" tcpdump -i any -s 150 -w "${TCPDUMP_OUTPUT}" &
 		TCPDUMP_PID=$!
-		sleep 1
+		sleep 1 # give some time to TCPDump to start
 	fi
 }
 
 cleanup() {
 	if [ -n "${TCPDUMP_PID}" ]; then
+		sleep 1 # give some time to TCPDump to process the packets
 		kill "${TCPDUMP_PID}"
 		wait "${TCPDUMP_PID}" 2>/dev/null || true
 	fi
