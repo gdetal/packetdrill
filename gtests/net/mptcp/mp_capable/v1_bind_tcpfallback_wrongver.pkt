@@ -5,12 +5,17 @@
 +0     socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
 +0     setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
 
++0     `nstat -n`
 +0     bind(3, ..., ...) = 0
 +0     listen(3, 1) = 0
 +0       <  S   0:0(0)         win 32792  <mss 1460, sackOK, nop, nop, nop, wscale 8, mpcapable v0 flags[flag_h] key[ckey=2]>
 +0       >  S.  0:0(0)  ack 1             <mss 1460, nop, nop, sackOK, nop, wscale 8>
 +0.01    <   .  1:1(0)  ack 1  win 257
 +0     accept(3, ..., ...) = 4
+
+//  test mibs
++0.01  `test $(nstat -zjs | jq '.kernel.MPTcpExtMPCapableSYNRX') -eq 0`
++0     `test $(nstat -zjs | jq '.kernel.MPTcpExtMPCapableFallbackACK') -eq 0`
 
 // ensure that traffic plane is functional and does not use DSS
 
