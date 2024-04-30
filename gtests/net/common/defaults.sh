@@ -57,6 +57,8 @@ sysctl -q net.ipv4.tcp_syncookies=1
 # enable MPTCP
 sysctl -q net.mptcp.enabled=1
 
+sysctl -q net.mptcp.scheduler=default
+
 # Override the default qdisc on the tun device.
 # Many tests fail with timing errors if the default
 # is FQ and that paces their flows.
