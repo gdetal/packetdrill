@@ -13,7 +13,7 @@
 
 +0.0  connect(3, ..., ...) = -1  EINPROGRESS (Operation now in progress)
 +0.0    >  addr[caddr0] > addr[saddr0]  S   0:0(0)                        <mss 1460, sackOK, TS val 4074410674 ecr 0,          nop, wscale 8, mpcapable v1 flags[flag_h] nokey>
-+0.0    <                               S.  0:0(0)      ack 1  win 65535  <mss 1460, sackOK, TS val 4074410674 ecr 4074410674, nop, wscale 8, mpcapable v1 flags[flag_h] key[skey=2]>
++0.01   <                               S.  0:0(0)      ack 1  win 65535  <mss 1460, sackOK, TS val 4074410674 ecr 4074410674, nop, wscale 8, mpcapable v1 flags[flag_h] key[skey=2]>
 +0.0    >                                .  1:1(0)      ack 1             <nop, nop,         TS val 4074410674 ecr 4074410674,                mpcapable v1 flags[flag_h] key[ckey, skey]>
 
 +0.2  getsockopt(3, SOL_SOCKET, SO_ERROR, [0], [4]) = 0

@@ -3,8 +3,8 @@
 
 +0    `../common/client.sh`
 
-+0    `../common/load_struct_ops.sh mptcp_bpf_rr.bpf.o`
-+0    `sysctl -q net.mptcp.scheduler=bpf_rr`
++0    `../common/load_struct_ops.sh mptcp_bpf_red.bpf.o`
++0    `sysctl -q net.mptcp.scheduler=bpf_red`
 
 +0.0  socket(..., SOCK_STREAM, IPPROTO_MPTCP) = 3
 +0.0  setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
@@ -29,18 +29,23 @@
 +0.0    >                                .  1:1(0)      ack 1             <nop, nop,         TS val 448955294 ecr 448955294,                mp_join_ack                  sender_hmac=auto>
 +0.0    <                                .  1:1(0)      ack 1  win 256    <nop, nop,         TS val 448955294 ecr 448955294, dss dack8=3   nocs>
 
-+0.0  write(3, ..., 100) = 100
-+0.0    >               > addr[saddr1]  P.  1:101(100)  ack 1             <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1 dsn8=3 ssn=1 dll=100 nocs, nop, nop>
-+0.0    <                                .  1:1(0)      ack 101 win 256   <nop, nop, TS val 448955294 ecr 448955294, dss dack8=103 nocs>
+// Generate data, duplicate should appear on all subflows
++0.0  write(3, ..., 20) = 20
++0.0    >               > addr[saddr0]  P.  3:23(20)    ack 1              <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1 dsn8=3 ssn=3 dll=20 nocs, nop, nop>
++0.0    <                                .  1:1(0)      ack 23  win 256    <nop, nop, TS val 448955294 ecr 448955294, dss dack8=23   nocs>
 
-+0.0  write(3, ..., 100) = 100
-+0.0    >               > addr[saddr0]  P.  3:103(100)  ack 1             <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1 dsn8=103 ssn=3 dll=100 nocs, nop, nop>
-+0.0    <  addr[saddr0] > addr[caddr0]   .  1:1(0)      ack 103 win 256   <nop, nop, TS val 448955294 ecr 448955294, dss dack8=203 nocs>
++0.0    >               > addr[saddr1]  P.  1:21(20)    ack 1              <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1 dsn8=3 ssn=1 dll=20 nocs, nop, nop>
++0.0    <                                .  1:1(0)      ack 21  win 256    <nop, nop, TS val 448955294 ecr 448955294, dss dack8=23   nocs>
 
-+0.0  write(3, ..., 100) = 100
-+0.0    >               > addr[saddr1]  P. 101:201(100) ack 1              <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1   dsn8=203 ssn=101 dll=100 nocs, nop, nop>
-+0.0    <                                .  1:1(0)      ack 201 win 256    <nop, nop,         TS val 448955294 ecr 448955294, dss dack8=303   nocs>
+// Generate data, duplicate should appear on all subflows
+// Do not ack data to force an MPTCP reinjection
++0.0  write(3, ..., 20) = 20
++0.0    >               > addr[saddr1]  P.  21:41(20)   ack 1              <nop, nop, TS val 4074418294 ecr 4074418294, dss dack4=1 dsn8=23 ssn=21 dll=20 nocs, nop, nop>
++0.0    <                                .  1:1(0)      ack 41  win 256    <nop, nop, TS val 448955294 ecr 448955294, dss dack8=23   nocs>
 
-+0.0  write(3, ..., 100) = 100
-+0.0    >               > addr[saddr0]  P. 103:203(100) ack 1              <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1   dsn8=303 ssn=103 dll=100 nocs, nop, nop>
-+0.0    <  addr[saddr0] > addr[caddr0]   .  1:1(0)      ack 203 win 256    <nop, nop,         TS val 448955294 ecr 448955294, dss dack8=403   nocs>
++0.0    >               > addr[saddr0]  P.  23:43(20)   ack 1              <nop, nop, TS val 448955294 ecr 448955294, dss dack4=1 dsn8=23 ssn=23 dll=20 nocs, nop, nop>
++0.0    <                                .  1:1(0)      ack 43  win 256    <nop, nop, TS val 448955294 ecr 448955294, dss dack8=23   nocs>
+
+// Reinjected once:
++0.0    >               > addr[saddr1]  P.  41:61(20)   ack 1              <nop, nop, TS val 4074418294 ecr 4074418294, dss dack4=1 dsn8=23 ssn=41 dll=20 nocs, nop, nop>
++0.0    <                                .  1:1(0)      ack 61  win 256    <nop, nop, TS val 448955294 ecr 448955294, dss dack8=43   nocs>
